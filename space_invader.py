@@ -14,15 +14,23 @@ w = gui.Window("Space Invador", 480, 640)
 prevTimestamp = 0
 
 def initialize(timestamp):
+	w.data.bg = w.newRectangle(0, 0, 480, 640)
+
 	w.data.width_image = [16, 22, 24]
 	w.data.height_image = [16, 16, 16]
 	w.data.filenames = [['squid_0.png', 'squid_1.png'], ['crab_0.png', 'crab_1.png'], ['octopus_0.png', 'octopus_1.png']]
 	
 	w.data.key_quit = 'Escape'
+	w.data.key_left = 'Left'
+	w.data.key_right = 'Right'
 
-	w.data.objs = []
+	player_x = 240
+	player_y = 600
+	playerNumber= w.newImage(player_x, player_y, 'player.png', 26, 16)
+	w.data.player = [playerNumber, player_x, player_y]
+
+	w.data.invaders = []
 	w.data.moveCnt = 0
-	w.data.bg = w.newRectangle(0, 0, 480, 640)
 
 	w.data.invader_interval_h = 36
 	w.data.invader_interval_v = 42
@@ -34,7 +42,7 @@ def initialize(timestamp):
 			pos_x = 368 - (w.data.invader_interval_h * j) + dx
 			pos_y = 332 - (w.data.invader_interval_v * i)
 			number = w.newImage(pos_x, pos_y, w.data.filenames[fileNameIdx][0],  w.data.width_image[fileNameIdx],  w.data.height_image[fileNameIdx])
-			w.data.objs.append([
+			w.data.invaders.append([
 				number,
 				fileNameIdx,
 				0,
@@ -49,35 +57,45 @@ def initialize(timestamp):
 
 def update(timestamp):
 	global prevTimestamp
+	p = w.data.player
 	if w.keys[w.data.key_quit]:
 		w.stop()
 		return
-	for obj in w.data.objs:
+	
+	if w.keys[w.data.key_left]:
+		p[1] -= 3
+		w.moveObject(p[0], p[1], p[2])
+		
+	if w.keys[w.data.key_right]:
+		p[1] += 3
+		w.moveObject(p[0], p[1], p[2])
+
+	for invader in w.data.invaders:
 		'''
-        obj[0]: number
-        obj[1]: fileNameIdx
-        obj[2]: animationIdx
-        obj[3]: pos_x
-        obj[4]: pos_y
-        obj[5]: timestamp
-        obj[6]: moveCnt
-        obj[7]: moveDir
-		obj[8]: timeMod
+        invader[0]: number
+        invader[1]: fileNameIdx
+        invader[2]: animationIdx
+        invader[3]: pos_x
+        invader[4]: pos_y
+        invader[5]: timestamp
+        invader[6]: moveCnt
+        invader[7]: moveDir
+		invader[8]: timeMod
         '''
-		if obj[5] <= timestamp:
-			obj[1] %= 3
-			obj[2] = (obj[2] + 1) % 2
-			obj[3] += 8 * obj[7]
-			w.moveObject(obj[0], obj[3], obj[4])
-			w.setImage(obj[0], w.data.filenames[obj[1]][obj[2]], w.data.width_image[obj[1]], w.data.height_image[obj[1]])
-			obj[5] = timestamp + obj[8]
-			obj[6] += 1
-			if obj[6] >= 10:
-				obj[3] += 8 * obj[7]
-				obj[4] += w.data.invader_interval_v / 2
-				obj[7] *= -1
-				obj[6] = -1
-				obj[8] = max(0.1, obj[8] * 0.9)
+		if invader[5] <= timestamp:
+			invader[1] %= 3
+			invader[2] = (invader[2] + 1) % 2
+			invader[3] += 8 * invader[7]
+			w.moveObject(invader[0], invader[3], invader[4])
+			w.setImage(invader[0], w.data.filenames[invader[1]][invader[2]], w.data.width_image[invader[1]], w.data.height_image[invader[1]])
+			invader[5] = timestamp + invader[8]
+			invader[6] += 1
+			if invader[6] >= 10:
+				invader[3] += 8 * invader[7]
+				invader[4] += w.data.invader_interval_v / 3
+				invader[7] *= -1
+				invader[6] = -1
+				invader[8] = max(0.1, invader[8] * 0.9)
 		prevTimestamp = timestamp
 
 w.initialize = initialize
