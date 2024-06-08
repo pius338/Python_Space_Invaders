@@ -10,16 +10,12 @@ def initialize(timestamp):
     w.data.filenames = [['squid_0.png', 'squid_1.png'], ['crab_0.png', 'crab_1.png'], ['octopus_0.png', 'octopus_1.png']]
     w.data.invader_interval_h = 36
     w.data.invader_interval_v = 42
+    w.data.invader_count = 0
 
     w.data.missile_width = 6
     w.data.missile_height = 14
     w.data.missilefiles = ['missile_1.png', 'missile_2.png', 'missile_3.png', 'missile_4.png']
     w.data.last_missile_time = 0
-
-    w.data.key_quit = 'Escape'
-    w.data.key_left = 'Left'
-    w.data.key_right = 'Right'
-    w.data.key_space = 'space'
 
     w.data.objs = []
 
@@ -40,21 +36,22 @@ def initialize(timestamp):
             ])
 
 def update(timestamp):
-    if w.keys[w.data.key_quit]:
+    w.data.invader_count = 0
+    if w.keys['Escape']:
         w.stop()
         return
 
     for obj in w.data.objs:
         if obj[0] == 'player':
-            if w.keys[w.data.key_left]:
+            if w.keys['Left']:
                 if obj[2] > 8:
                     obj[2] -= 3
                 w.moveObject(obj[1], obj[2], obj[3])
-            if w.keys[w.data.key_right]:
+            if w.keys['Right']:
                 if obj[2] < 448:
                     obj[2] += 3
                 w.moveObject(obj[1], obj[2], obj[3])
-            if w.keys[w.data.key_space] and timestamp - w.data.last_missile_time > 0.5:
+            if w.keys['space'] and timestamp - w.data.last_missile_time > 0.5:
                 mNum = w.newImage(obj[2], obj[3], w.data.missilefiles[0], w.data.missile_width, w.data.missile_height)
                 w.data.objs.append(['missile', mNum, obj[2], obj[3], 0, timestamp])
                 w.data.last_missile_time = timestamp
@@ -87,6 +84,10 @@ def update(timestamp):
             invader[7]: moveDir
             invader[8]: timeMod
             '''
+            if w.keys['c']:
+                w.deleteObject(obj[1])
+                w.data.objs.remove(obj)
+
             for missile in [m for m in w.data.objs if m[0] == 'missile']:
                 m_x = missile[2] + (w.data.missile_width / 2)
                 m_y = missile[3]
@@ -111,7 +112,11 @@ def update(timestamp):
                     obj[8] *= -1
                     obj[7] = -1
                     obj[9] = max(0.1, obj[9] * 0.9)
-
+            w.data.invader_count += 1
+    if w.data.invader_count == 0:
+        print("Game Clear")
+        w.stop()
+        return
 w.initialize = initialize
 w.update = update
 
