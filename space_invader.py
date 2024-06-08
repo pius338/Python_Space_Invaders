@@ -15,15 +15,34 @@ prevTimestamp = 0
 
 def initialize(timestamp):
 	w.data.width_image = 24
-	w.data.squid_filenames = ['squid_0.png', 'squid_1.png']
-	w.data.crab_filenames = ['crab_0.png', 'crab_1.png']
-	w.data.octopus_filenames = ['octopus_0.png', 'octopus_1.png']
+	w.data.height_image = 24
+	w.data.filenames = [['squid_0.png', 'squid_1.png'], ['crab_0.png', 'crab_1.png'], ['octopus_0.png', 'octopus_1.png']]
 	
 	w.data.key_quit = 'Escape'
 
 	w.data.objs = []
+	w.data.moveCnt = 0
 	w.data.bg = w.newRectangle(0, 0, 480, 640)
-	w.data.squid = w.newImage(0, 0, 'squid_0.png',  w.data.width_image,  w.data.width_image)
+
+	invader_interval_h = 36
+	invader_interval_v = 48
+
+	for i in range(5):
+		for j in range(11):
+			fileNameIdx = 2 if i == 0 or i == 1 else 1 if i == 2 or i == 3 else 0
+			pos_x = 368 - (invader_interval_h * j)
+			pos_y = 332 - (invader_interval_v * i)
+			number = w.newImage(pos_x, pos_y, w.data.filenames[fileNameIdx][0],  w.data.width_image,  w.data.height_image)
+			w.data.objs.append([
+				number,
+				fileNameIdx,
+				0,
+				pos_x,
+				pos_y,
+                timestamp + (i / 20),
+				0,
+				1
+			])
 
 
 def update(timestamp):
@@ -31,8 +50,28 @@ def update(timestamp):
 	if w.keys[w.data.key_quit]:
 		w.stop()
 		return
-	if(prevTimestamp + 1 <= timestamp):
-		print(timestamp)
+	for obj in w.data.objs:
+		'''
+        obj[0]: number
+        obj[1]: fileNameIdx
+        obj[2]: animationIdx
+        obj[3]: pos_x
+        obj[4]: pos_y
+        obj[5]: timestamp
+        obj[6]: moveCnt
+        obj[7]: moveDir
+        '''
+		if obj[5] <= timestamp:
+			obj[1] %= 3
+			obj[2] = (obj[2] + 1) % 2
+			obj[3] += 8 * obj[7]
+			w.moveObject(obj[0], obj[3], obj[4])
+			w.setImage(obj[0], w.data.filenames[obj[1]][obj[2]], w.data.width_image, w.data.height_image)
+			obj[5] = timestamp + 1
+			obj[6] += 1
+			if obj[6] >= 10:
+				obj[7] *= -1
+				obj[6] = 0
 		prevTimestamp = timestamp
 
 w.initialize = initialize
