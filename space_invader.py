@@ -11,7 +11,6 @@ gui 모듈을 사용하기 위한 기본 구조를 미리 적어 둔 파일입�
 import gui_core as gui
 
 w = gui.Window("Space Invador", 480, 640)
-prevTimestamp = 0
 
 def initialize(timestamp):
 	w.data.bg = w.newRectangle(0, 0, 480, 640)
@@ -59,7 +58,6 @@ def initialize(timestamp):
 
 
 def update(timestamp):
-	global prevTimestamp
 	p = w.data.player
 	if w.keys[w.data.key_quit]:
 		w.stop()
@@ -120,7 +118,6 @@ def update(timestamp):
 				invader[7] *= -1
 				invader[6] = -1
 				invader[8] = max(0.1, invader[8] * 0.9)
-		prevTimestamp = timestamp
 
 w.initialize = initialize
 w.update = update
