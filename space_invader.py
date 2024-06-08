@@ -14,8 +14,8 @@ w = gui.Window("Space Invador", 480, 640)
 prevTimestamp = 0
 
 def initialize(timestamp):
-	w.data.width_image = 24
-	w.data.height_image = 24
+	w.data.width_image = [16, 22, 24]
+	w.data.height_image = [16, 16, 16]
 	w.data.filenames = [['squid_0.png', 'squid_1.png'], ['crab_0.png', 'crab_1.png'], ['octopus_0.png', 'octopus_1.png']]
 	
 	w.data.key_quit = 'Escape'
@@ -24,15 +24,16 @@ def initialize(timestamp):
 	w.data.moveCnt = 0
 	w.data.bg = w.newRectangle(0, 0, 480, 640)
 
-	invader_interval_h = 36
-	invader_interval_v = 48
+	w.data.invader_interval_h = 36
+	w.data.invader_interval_v = 42
 
 	for i in range(5):
 		for j in range(11):
-			fileNameIdx = 2 if i == 0 or i == 1 else 1 if i == 2 or i == 3 else 0
-			pos_x = 368 - (invader_interval_h * j)
-			pos_y = 332 - (invader_interval_v * i)
-			number = w.newImage(pos_x, pos_y, w.data.filenames[fileNameIdx][0],  w.data.width_image,  w.data.height_image)
+			fileNameIdx = 2 if i == 0 or i == 1 else 1 if i == 2 or i == 3 else 0 #Invader 종류 설정
+			dx = 0 if fileNameIdx == 2 else 1 if fileNameIdx == 1 else 4 #너비 보정
+			pos_x = 368 - (w.data.invader_interval_h * j) + dx
+			pos_y = 332 - (w.data.invader_interval_v * i)
+			number = w.newImage(pos_x, pos_y, w.data.filenames[fileNameIdx][0],  w.data.width_image[fileNameIdx],  w.data.height_image[fileNameIdx])
 			w.data.objs.append([
 				number,
 				fileNameIdx,
@@ -41,6 +42,7 @@ def initialize(timestamp):
 				pos_y,
                 timestamp + (i / 20),
 				0,
+				1,
 				1
 			])
 
@@ -60,18 +62,22 @@ def update(timestamp):
         obj[5]: timestamp
         obj[6]: moveCnt
         obj[7]: moveDir
+		obj[8]: timeMod
         '''
 		if obj[5] <= timestamp:
 			obj[1] %= 3
 			obj[2] = (obj[2] + 1) % 2
 			obj[3] += 8 * obj[7]
 			w.moveObject(obj[0], obj[3], obj[4])
-			w.setImage(obj[0], w.data.filenames[obj[1]][obj[2]], w.data.width_image, w.data.height_image)
-			obj[5] = timestamp + 1
+			w.setImage(obj[0], w.data.filenames[obj[1]][obj[2]], w.data.width_image[obj[1]], w.data.height_image[obj[1]])
+			obj[5] = timestamp + obj[8]
 			obj[6] += 1
 			if obj[6] >= 10:
+				obj[3] += 8 * obj[7]
+				obj[4] += w.data.invader_interval_v / 2
 				obj[7] *= -1
-				obj[6] = 0
+				obj[6] = -1
+				obj[8] = max(0.1, obj[8] * 0.9)
 		prevTimestamp = timestamp
 
 w.initialize = initialize
