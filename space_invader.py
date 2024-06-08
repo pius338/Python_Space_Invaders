@@ -19,21 +19,24 @@ def initialize(timestamp):
 	w.data.width_image = [16, 22, 24]
 	w.data.height_image = [16, 16, 16]
 	w.data.filenames = [['squid_0.png', 'squid_1.png'], ['crab_0.png', 'crab_1.png'], ['octopus_0.png', 'octopus_1.png']]
-	
+	w.data.invader_interval_h = 36
+	w.data.invader_interval_v = 42
+	w.data.invaders = []
+
+	w.data.missile_width = 6
+	w.data.missile_height = 14
+	w.data.missilefiles = ['missile_1.png', 'missile_2.png', 'missile_3.png', 'missile_4.png']
+	w.data.missiles = []
+
 	w.data.key_quit = 'Escape'
 	w.data.key_left = 'Left'
 	w.data.key_right = 'Right'
+	w.data.key_space = 'space'
 
 	player_x = 240
 	player_y = 600
 	playerNumber= w.newImage(player_x, player_y, 'player.png', 26, 16)
 	w.data.player = [playerNumber, player_x, player_y]
-
-	w.data.invaders = []
-	w.data.moveCnt = 0
-
-	w.data.invader_interval_h = 36
-	w.data.invader_interval_v = 42
 
 	for i in range(5):
 		for j in range(11):
@@ -69,6 +72,27 @@ def update(timestamp):
 	if w.keys[w.data.key_right]:
 		p[1] += 3
 		w.moveObject(p[0], p[1], p[2])
+
+	if w.keys[w.data.key_space]:
+		if len(w.data.missiles) == 0 or w.data.missiles[-1][4] + 1 < timestamp:
+			mNum = w.newImage(p[1], p[2], w.data.missilefiles[0], w.data.missile_width, w.data.missile_height)
+			w.data.missiles.append([mNum, p[1], p[2], 0, timestamp, timestamp])
+
+	for missile in w.data.missiles:
+		'''
+		missile[0]: number
+		missile[1]: pos_x
+		missile[2]: pos_y
+		missile[3]: animationIdx
+		missile[4]: moveTimestamp
+		missile[5]: animationTimestamp
+		'''
+		missile[2] -= 4
+		missile[3] = (missile[3] + 1) % 4
+		w.moveObject(missile[0], missile[1], missile[2])
+		if missile[5] + 0.1 < timestamp:
+			w.setImage(missile[0], w.data.missilefiles[missile[3]], w.data.missile_width, w.data.missile_height)
+			missile[5] = timestamp
 
 	for invader in w.data.invaders:
 		'''
