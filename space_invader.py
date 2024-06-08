@@ -32,7 +32,7 @@ def initialize(timestamp):
 	w.data.key_right = 'Right'
 	w.data.key_space = 'space'
 
-	player_x = 240
+	player_x = 232
 	player_y = 600
 	playerNumber= w.newImage(player_x, player_y, 'player.png', 26, 16)
 	w.data.player = [playerNumber, player_x, player_y]
@@ -64,11 +64,13 @@ def update(timestamp):
 		return
 	
 	if w.keys[w.data.key_left]:
-		p[1] -= 3
+		if p[1] > 8:
+			p[1] -= 3
 		w.moveObject(p[0], p[1], p[2])
 		
 	if w.keys[w.data.key_right]:
-		p[1] += 3
+		if p[1] < 448:
+			p[1] += 3
 		w.moveObject(p[0], p[1], p[2])
 
 	if w.keys[w.data.key_space]:
