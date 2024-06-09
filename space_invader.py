@@ -40,6 +40,11 @@ def initialize(timestamp):
 	w.data.invader_interval_v = 42
 	w.data.invader_count = 0
 
+	w.data.ufo_width = 48
+	w.data.ufo_height = 21
+	w.data.ufo_x = x_offset - w.data.ufo_width - 5
+	w.data.ufo_y = y_offset * 2
+
 	w.data.missile_width = 6
 	w.data.missile_height = 14
 	w.data.missilefiles = ['missile_1.png', 'missile_2.png', 'missile_3.png', 'missile_4.png']
@@ -76,6 +81,9 @@ def initialize(timestamp):
 			w.data.objs.append([
 				'invader', number, fileNameIdx, 0, pos_x, pos_y, timestamp + (i / 20) + (j / 50), 0, 1, 1
 			])
+
+	ufoNum = w.newImage(w.data.ufo_x, w.data.ufo_y, 'ufo.png', w.data.ufo_width, w.data.ufo_height)
+	w.data.objs.append(['ufo', ufoNum, w.data.ufo_x, w.data.ufo_y, timestamp])
 	w.newRectangle(x_offset, w.data.game_over_line_y, screen_width - (x_offset * 2), 3, 'green')
 
 def update(timestamp):
@@ -102,11 +110,11 @@ def update(timestamp):
 		for obj in w.data.objs:
 			if obj[0] == 'player':
 				if w.keys['Left']:
-					if obj[2] > 8:
+					if obj[2] > 8 + x_offset:
 						obj[2] -= 3
 					w.moveObject(obj[1], obj[2], obj[3])
 				if w.keys['Right']:
-					if obj[2] < 448:
+					if obj[2] < screen_width - x_offset - w.data.player_width - 8:
 						obj[2] += 3
 					w.moveObject(obj[1], obj[2], obj[3])
 				if w.keys['space'] and timestamp - w.data.last_missile_time > 0.5:
@@ -143,6 +151,25 @@ def update(timestamp):
 				if timestamp - obj[5] > 0.1:
 					w.setImage(obj[1], w.data.missilefiles[obj[4]], w.data.missile_width, w.data.missile_height)
 					obj[5] = timestamp
+
+			elif obj[0] == 'ufo':
+				if timestamp - obj[4] > 15:
+					obj[2] += 4
+				w.moveObject(obj[1], obj[2], obj[3])
+				if obj[2] > screen_width:
+					obj[2] = w.data.ufo_x
+					obj[4] = timestamp
+				for missile in [m for m in w.data.objs if m[0] == 'missile']:
+					m_x = missile[2] + (w.data.missile_width / 2)
+					m_y = missile[3]
+					if m_x > obj[2] and m_x < obj[2] + w.data.ufo_width and m_y > obj[3] and m_y < obj[3] + w.data.ufo_height:
+						ufo_score = random.randint(50, 300)
+						w.data.score += ufo_score
+						w.deleteObject(obj[1])
+						w.data.objs.remove(obj)
+						w.deleteObject(missile[1])
+						w.data.objs.remove(missile)
+						break
 
 			elif obj[0] == 'invader':
 				'''
