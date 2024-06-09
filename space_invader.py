@@ -3,11 +3,14 @@ import random
 
 screen_width = 600
 screen_height = 800
+x_offset = 60
+y_offset = 80
 
 w = gui.Window("Space Invador", screen_width, screen_height)
 
 def initialize(timestamp):
-	w.data.bg = w.newRectangle(0, 0, screen_width, screen_height)
+	w.data.bg = w.newRectangle(x_offset, y_offset, screen_width - (x_offset * 2), screen_height - (y_offset * 2))
+	w.data.game_over_line_y = screen_height - (y_offset * 1.5)
 
 	w.data.invader_width = [16, 22, 24]
 	w.data.invader_height = [16, 16, 16]
@@ -32,13 +35,15 @@ def initialize(timestamp):
 	w.data.player_height = 16
 	w.data.player_life = 3
 	player_x = (screen_width / 2) - (w.data.player_width / 2)
-	player_y = screen_height - 100
+	player_y = w.data.game_over_line_y - (w.data.player_height * 2.5)
 	playerNumber = w.newImage(player_x, player_y, 'player.png', w.data.player_width, w.data.player_height)
 	w.data.objs.append(['player', playerNumber, player_x, player_y, w.data.player_width])
 
+	tNum = w.newText(x_offset + 30, w.data.game_over_line_y + 20, 50, str(w.data.player_life), 'green')
+	w.data.objs.append(['life_text', tNum])
 	for i in range(w.data.player_life):
-		life_x = 20 + i * (w.data.player_width * 1.5)
-		life_y = screen_height - (w.data.player_height * 2)
+		life_x = i * (w.data.player_width * 1.5) + x_offset * 2
+		life_y = w.data.game_over_line_y + 5
 		hNum = w.newImage(life_x, life_y, 'player.png', w.data.player_width, w.data.player_height)
 		w.data.objs.append(['life_gauge', hNum, life_x, life_y])
 
@@ -46,12 +51,13 @@ def initialize(timestamp):
 		for j in range(11):
 			fileNameIdx = 2 if i == 0 or i == 1 else 1 if i == 2 or i == 3 else 0
 			dx = 0 if fileNameIdx == 2 else 1 if fileNameIdx == 1 else 4
-			pos_x = 428 - (w.data.invader_interval_h * j) + dx
+			pos_x = 424 - (w.data.invader_interval_h * j) + dx
 			pos_y = 332 - (w.data.invader_interval_v * i)
 			number = w.newImage(pos_x, pos_y, w.data.filenames[fileNameIdx][0], w.data.invader_width[fileNameIdx], w.data.invader_height[fileNameIdx])
 			w.data.objs.append([
 				'invader', number, fileNameIdx, 0, pos_x, pos_y, timestamp + (i / 20) + (j / 50), 0, 1, 1
 			])
+	w.newRectangle(x_offset, w.data.game_over_line_y, screen_width - (x_offset * 2), 3, 'green')
 
 def update(timestamp):
 	w.data.invader_count = 0
@@ -86,6 +92,9 @@ def update(timestamp):
 					w.deleteObject(missile[1])
 					w.data.objs.remove(missile)
 					break
+		elif obj[0] == 'life_text':
+			w.setText(obj[1], str(w.data.player_life))
+
 		elif obj[0] == 'life_gauge':
 			if life_count <= 0:
 				w.deleteObject(obj[1])
@@ -125,6 +134,11 @@ def update(timestamp):
 			if w.keys['c']:
 				w.deleteObject(obj[1])
 				w.data.objs.remove(obj)
+			
+			if obj[5] + w.data.invader_height[obj[2]] >= w.data.game_over_line_y:
+				print("GameOver")
+				w.stop()
+				return
 
 			for missile in [m for m in w.data.objs if m[0] == 'missile']:
 				m_x = missile[2] + (w.data.missile_width / 2)
@@ -155,6 +169,7 @@ def update(timestamp):
 					obj[8] *= -1
 					obj[7] = -1
 					obj[9] = max(0.1, obj[9] * 0.9)
+					# obj[9] = 0.01
 			w.data.invader_count += 1
 		elif obj[0] == 'invader_missile':
 			obj[3] += 3
@@ -163,7 +178,7 @@ def update(timestamp):
 			if timestamp - obj[5] > 0.1:
 				w.setImage(obj[1], w.data.invader_missilefiles[obj[4]], w.data.invader_missile_width, w.data.invader_missile_height)
 				obj[5] = timestamp
-			if obj[3] > screen_height:
+			if obj[3] > w.data.game_over_line_y - w.data.invader_missile_height:
 				w.deleteObject(obj[1])
 				w.data.objs.remove(obj)
 	if w.data.invader_count == 0:
