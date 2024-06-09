@@ -1,10 +1,13 @@
 import gui_core as gui
 import random
 
-w = gui.Window("Space Invador", 480, 640)
+screen_width = 600
+screen_height = 800
+
+w = gui.Window("Space Invador", screen_width, screen_height)
 
 def initialize(timestamp):
-	w.data.bg = w.newRectangle(0, 0, 480, 640)
+	w.data.bg = w.newRectangle(0, 0, screen_width, screen_height)
 
 	w.data.invader_width = [16, 22, 24]
 	w.data.invader_height = [16, 16, 16]
@@ -25,8 +28,10 @@ def initialize(timestamp):
 
 	w.data.objs = []
 
-	player_x = 232
-	player_y = 600
+	w.data.player_width = 26
+	w.data.player_height = 16
+	player_x = (screen_width / 2) - (w.data.player_width / 2)
+	player_y = screen_height - 100
 	playerNumber = w.newImage(player_x, player_y, 'player.png', 26, 16)
 	w.data.objs.append(['player', playerNumber, player_x, player_y])
 
@@ -34,7 +39,7 @@ def initialize(timestamp):
 		for j in range(11):
 			fileNameIdx = 2 if i == 0 or i == 1 else 1 if i == 2 or i == 3 else 0
 			dx = 0 if fileNameIdx == 2 else 1 if fileNameIdx == 1 else 4
-			pos_x = 368 - (w.data.invader_interval_h * j) + dx
+			pos_x = 428 - (w.data.invader_interval_h * j) + dx
 			pos_y = 332 - (w.data.invader_interval_v * i)
 			number = w.newImage(pos_x, pos_y, w.data.filenames[fileNameIdx][0], w.data.invader_width[fileNameIdx], w.data.invader_height[fileNameIdx])
 			w.data.objs.append([
@@ -106,7 +111,7 @@ def update(timestamp):
 					w.data.objs.remove(missile)
 					break
 
-			if  random.random() < 0.001 and timestamp - w.data.last_invader_missile_time > 0.5: #여기
+			if  random.random() < 0.001 and timestamp - w.data.last_invader_missile_time > 0.5:
 				mNum = w.newImage(obj[4], obj[5], w.data.invader_missilefiles[0], w.data.invader_missile_width, w.data.invader_missile_height)
 				w.data.objs.append(['invader_missile', mNum, obj[4], obj[5], 0, timestamp])
 				w.data.last_invader_missile_time = timestamp
@@ -119,7 +124,7 @@ def update(timestamp):
 				w.setImage(obj[1], w.data.filenames[obj[2]][obj[3]], w.data.invader_width[obj[2]], w.data.invader_height[obj[2]])
 				obj[6] = timestamp + obj[9]
 				obj[7] += 1
-				if obj[7] >= 10:
+				if obj[7] >= 11:
 					obj[4] += 8 * obj[8]
 					obj[5] += w.data.invader_interval_v / 3
 					obj[8] *= -1
