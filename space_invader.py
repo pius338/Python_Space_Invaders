@@ -128,6 +128,7 @@ def update(timestamp):
 						mNum = w.newImage(obj[2], obj[3], w.data.missilefiles[0], w.data.missile_width, w.data.missile_height)
 						w.data.objs.append(['missile', mNum, obj[2], obj[3], 0, timestamp])
 						w.data.last_missile_time = timestamp
+						w.playSound('shoot.wav')
 				
 					for missile in [m for m in w.data.objs if m[0] == 'invader_missile']:
 						m_x = missile[2] + (w.data.invader_missile_width / 2)
@@ -138,6 +139,7 @@ def update(timestamp):
 							w.setImage(obj[1], 'player_die.png', 30, 16)
 							obj[5] = True
 							obj[6] = timestamp
+							w.playSound('explosion.wav')
 							break
 
 			elif obj[0] == 'missile':
@@ -174,7 +176,7 @@ def update(timestamp):
 					obj[4] = timestamp
 					obj[5] = False
 
-				if obj[5] == False and timestamp - obj[4] > 3:
+				if obj[5] == False and timestamp - obj[4] > 2:
 					obj[2] += 4
 
 				w.moveObject(obj[1], obj[2], obj[3])
@@ -191,6 +193,7 @@ def update(timestamp):
 						w.setImage(obj[1], 'invader_die.png', 52, 32)
 						obj[5] = True
 						obj[6] = timestamp
+						w.playSound('invader_die.wav')
 						w.deleteObject(missile[1])
 						w.data.objs.remove(missile)
 						break
@@ -216,6 +219,7 @@ def update(timestamp):
 				
 				if obj[10] and timestamp - obj[11] > 0.2:	
 					w.data.score += 30 - (obj[2] * 10)
+					w.playSound('invader_die.wav')
 					w.deleteObject(obj[1])
 					w.data.objs.remove(obj)
 
