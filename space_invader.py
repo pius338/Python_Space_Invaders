@@ -111,7 +111,7 @@ def update(timestamp):
 					w.data.objs.remove(missile)
 					break
 
-			if  random.random() < 0.001 and timestamp - w.data.last_invader_missile_time > 0.5:
+			if  random.random() < 0.0008 and timestamp - w.data.last_invader_missile_time > 0.5:
 				mNum = w.newImage(obj[4], obj[5], w.data.invader_missilefiles[0], w.data.invader_missile_width, w.data.invader_missile_height)
 				w.data.objs.append(['invader_missile', mNum, obj[4], obj[5], 0, timestamp])
 				w.data.last_invader_missile_time = timestamp
@@ -138,7 +138,7 @@ def update(timestamp):
 			if timestamp - obj[5] > 0.1:
 				w.setImage(obj[1], w.data.invader_missilefiles[obj[4]], w.data.invader_missile_width, w.data.invader_missile_height)
 				obj[5] = timestamp
-			if obj[3] > 640:
+			if obj[3] > screen_height:
 				w.deleteObject(obj[1])
 				w.data.objs.remove(obj)
 	if w.data.invader_count == 0:
