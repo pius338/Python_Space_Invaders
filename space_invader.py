@@ -30,10 +30,17 @@ def initialize(timestamp):
 
 	w.data.player_width = 26
 	w.data.player_height = 16
+	w.data.player_life = 3
 	player_x = (screen_width / 2) - (w.data.player_width / 2)
 	player_y = screen_height - 100
-	playerNumber = w.newImage(player_x, player_y, 'player.png', 26, 16)
-	w.data.objs.append(['player', playerNumber, player_x, player_y])
+	playerNumber = w.newImage(player_x, player_y, 'player.png', w.data.player_width, w.data.player_height)
+	w.data.objs.append(['player', playerNumber, player_x, player_y, w.data.player_width])
+
+	for i in range(w.data.player_life):
+		life_x = 20 + i * (w.data.player_width * 1.5)
+		life_y = screen_height - (w.data.player_height * 2)
+		hNum = w.newImage(life_x, life_y, 'player.png', w.data.player_width, w.data.player_height)
+		w.data.objs.append(['life_gauge', hNum, life_x, life_y])
 
 	for i in range(5):
 		for j in range(11):
@@ -48,6 +55,7 @@ def initialize(timestamp):
 
 def update(timestamp):
 	w.data.invader_count = 0
+	life_count = w.data.player_life
 	if w.keys['Escape']:
 		w.stop()
 		return
@@ -66,6 +74,23 @@ def update(timestamp):
 				mNum = w.newImage(obj[2], obj[3], w.data.missilefiles[0], w.data.missile_width, w.data.missile_height)
 				w.data.objs.append(['missile', mNum, obj[2], obj[3], 0, timestamp])
 				w.data.last_missile_time = timestamp
+			
+			for missile in [m for m in w.data.objs if m[0] == 'invader_missile']:
+				m_x = missile[2] + (w.data.invader_missile_width / 2)
+				m_y = missile[3]
+				if m_x > obj[2] and m_x < obj[2] + w.data.player_width and m_y > obj[3] and m_y < obj[3] + w.data.player_height:
+					w.data.player_life -= 1
+					if w.data.player_life <= 0:
+						w.deleteObject(obj[1])
+						w.data.objs.remove(obj)
+					w.deleteObject(missile[1])
+					w.data.objs.remove(missile)
+					break
+		elif obj[0] == 'life_gauge':
+			if life_count <= 0:
+				w.deleteObject(obj[1])
+				w.data.objs.remove(obj)
+			life_count -= 1
 
 		elif obj[0] == 'missile':
 			'''
