@@ -5,7 +5,6 @@ screen_width = 600
 screen_height = 800
 x_offset = 60
 y_offset = 80
-file = open('highscore.txt', 'r')
 
 w = gui.Window("Space Invador", screen_width, screen_height)
 
@@ -192,6 +191,9 @@ def update(timestamp):
 				if timestamp - obj[5] > 0.1:
 					w.setImage(obj[1], w.data.missilefiles[obj[4]], w.data.missile_width, w.data.missile_height)
 					obj[5] = timestamp
+				if obj[3] < y_offset * 2:
+					w.deleteObject(obj[1])
+					w.data.objs.remove(obj)
 
 			elif obj[0] == 'ufo':
 				'''
