@@ -156,9 +156,7 @@ def update(timestamp):
 					w.data.objs.remove(obj)
 				
 				if obj[5] + w.data.invader_height[obj[2]] >= w.data.game_over_line_y:
-					print("GameOver")
-					w.stop()
-					return
+					setGameOver()
 
 				for missile in [m for m in w.data.objs if m[0] == 'missile']:
 					m_x = missile[2] + (w.data.missile_width / 2)
@@ -183,13 +181,13 @@ def update(timestamp):
 					w.setImage(obj[1], w.data.filenames[obj[2]][obj[3]], w.data.invader_width[obj[2]], w.data.invader_height[obj[2]])
 					obj[6] = timestamp + obj[9]
 					obj[7] += 1
+					# obj[9] = 0.01
 					if obj[7] >= 11:
 						obj[4] += 8 * obj[8]
 						obj[5] += w.data.invader_interval_v / 3
 						obj[8] *= -1
 						obj[7] = -1
 						obj[9] = max(0.1, obj[9] * 0.9)
-						# obj[9] = 0.01
 				w.data.invader_count += 1
 			elif obj[0] == 'invader_missile':
 				obj[3] += 3
