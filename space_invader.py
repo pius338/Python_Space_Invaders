@@ -84,6 +84,7 @@ def initialize(timestamp):
 	ufoNum = w.newImage(w.data.ufo_x, w.data.ufo_y, 'ufo.png', w.data.ufo_width, w.data.ufo_height)
 	w.data.objs.append(['ufo', ufoNum, w.data.ufo_x, w.data.ufo_y, timestamp, False, 0])
 	w.newRectangle(x_offset, w.data.game_over_line_y, screen_width - (x_offset * 2), 3, 'green')
+	w.newImage(0, 0, 'frame.png', screen_width, screen_height)
 
 def update(timestamp):
 	if w.keys['Escape']:
@@ -174,6 +175,7 @@ def update(timestamp):
 					w.data.score += ufo_score
 					obj[2] = w.data.ufo_x
 					obj[4] = timestamp
+					w.setImage(obj[1], 'ufo.png', w.data.ufo_width, w.data.ufo_height)
 					obj[5] = False
 
 				if obj[5] == False and timestamp - obj[4] > 2:
