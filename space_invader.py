@@ -10,20 +10,28 @@ y_offset = 80
 w = gui.Window("Space Invador", screen_width, screen_height)
 
 def setGameOver():
-	w.newText(screen_width / 2 - 10 / 2, screen_height / 3 + 20, 100, 'GAME OVER', 'red')
-	w.newText(screen_width / 2 - 10 / 2, screen_height - 300, 200, 'Press \'ESC\' to quit.', 'white')
+	w.newText(screen_width / 2 - 5, screen_height / 3 + 20, 100, 'GAME OVER', 'red')
+	w.newText(screen_width / 2 - 5, screen_height - 300, 200, 'Press \'ESC\' to quit.', 'white')
 	w.data.isGameOver = True
 
 def setGameClear():
-	w.newText(screen_width / 2 - 10 / 2, screen_height / 3 + 20, 100, '!!GAME CLEAR!!', 'green')
-	w.newText(screen_width / 2 - 10 / 2, screen_height - 300, 200, 'Press \'ESC\' to quit.', 'white')
+	w.newText(screen_width / 2 - 5, screen_height / 3 + 20, 100, '!!GAME CLEAR!!', 'green')
+	w.newText(screen_width / 2 - 5, screen_height - 300, 200, 'Press \'ESC\' to quit.', 'white')
 	w.data.isGameOver = True
 
 def initialize(timestamp):
+	w.data.objs = []
+
 	w.data.isGameOver = False
 
 	w.data.bg = w.newRectangle(x_offset, y_offset, screen_width - (x_offset * 2), screen_height - (y_offset * 2))
 	w.data.game_over_line_y = screen_height - (y_offset * 1.5)
+
+	w.data.score = 0
+	sText = str(w.data.score).zfill(4)
+	w.newText(screen_width / 2 - 5, y_offset * 1.5, 200, 'SCORE', 'white')
+	stNum = w.newText(screen_width / 2 - 5, y_offset * 1.7, 200, sText, 'white')
+	w.data.objs.append(['score_text', stNum])
 
 	w.data.invader_width = [16, 22, 24]
 	w.data.invader_height = [16, 16, 16]
@@ -41,11 +49,6 @@ def initialize(timestamp):
 	w.data.invader_missile_height = 14
 	w.data.invader_missilefiles = ['invader_missile_1.png', 'invader_missile_2.png', 'invader_missile_3.png', 'invader_missile_4.png']
 	w.data.last_invader_missile_time = 0
-
-	w.data.objs = []
-
-	for obj in w.data.objs:
-		w.data.objs.remove(obj)
 
 	w.data.player_width = 26
 	w.data.player_height = 16
@@ -68,7 +71,7 @@ def initialize(timestamp):
 			fileNameIdx = 2 if i == 0 or i == 1 else 1 if i == 2 or i == 3 else 0
 			dx = 0 if fileNameIdx == 2 else 1 if fileNameIdx == 1 else 4
 			pos_x = 424 - (w.data.invader_interval_h * j) + dx
-			pos_y = 332 - (w.data.invader_interval_v * i)
+			pos_y = 382 - (w.data.invader_interval_v * i)
 			number = w.newImage(pos_x, pos_y, w.data.filenames[fileNameIdx][0], w.data.invader_width[fileNameIdx], w.data.invader_height[fileNameIdx])
 			w.data.objs.append([
 				'invader', number, fileNameIdx, 0, pos_x, pos_y, timestamp + (i / 20) + (j / 50), 0, 1, 1
@@ -89,6 +92,9 @@ def update(timestamp):
 				w.deleteObject(obj[1])
 				w.data.objs.remove(obj)
 			life_count -= 1
+		elif obj[0] == 'score_text':
+			t = str(w.data.score).zfill(4)
+			w.setText(obj[1], t)
 
 	if w.data.isGameOver == False:
 		w.data.invader_count = 0
@@ -162,6 +168,7 @@ def update(timestamp):
 					m_x = missile[2] + (w.data.missile_width / 2)
 					m_y = missile[3]
 					if m_x > obj[4] and m_x < obj[4] + w.data.invader_width[obj[2]] and m_y > obj[5] and m_y < obj[5] + w.data.invader_height[obj[2]]:
+						w.data.score += 30 - (obj[2] * 10)
 						w.deleteObject(obj[1])
 						w.data.objs.remove(obj)
 						w.deleteObject(missile[1])
