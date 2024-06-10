@@ -9,7 +9,7 @@ score = 0
 gameClearTime = 0
 timeMod = 0.9
 
-w = gui.Window("Space Invador", screen_width, screen_height)
+w = gui.Window("Space Invaders", screen_width, screen_height)
 
 def read_highscore():
     try:
