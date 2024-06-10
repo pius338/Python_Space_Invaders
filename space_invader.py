@@ -5,6 +5,8 @@ screen_width = 600
 screen_height = 800
 x_offset = 60
 y_offset = 80
+score = 0
+gameClearTime = 0
 
 w = gui.Window("Space Invador", screen_width, screen_height)
 
@@ -19,7 +21,6 @@ def read_highscore():
                 return highscore
             else:
                 raise ValueError(f"Error: File 'highscore.txt' does not contain a valid integer. Content: '{content}'")
-
     except FileNotFoundError:
         print(f"Error: File 'highscore.txt' not found.")
     except ValueError as ve:
@@ -30,37 +31,28 @@ def write_new_highscore(highscore):
         file.write(str(highscore))
 
 def setGameOver():
-	w.newText(screen_width / 2 - 5, screen_height / 3 + 20, 100, 'GAME OVER', 'red')
-	w.newText(screen_width / 2 - 5, screen_height - 300, 200, 'Press \'ESC\' to quit.', 'white')
+	w.newRectangle(x_offset + 4, y_offset * 2, screen_width - (x_offset * 2) - 8, screen_height - (y_offset * 3.5))
+	w.newImage(screen_width / 2 - 80, screen_height / 3 - 40, 'game_over.png', 161, 23)
+	w.newText(screen_width / 2 - 5, screen_height - 280, 200, 'Press \'ESC\' to quit.', 'white')
 	w.newText(screen_width / 2 - 5, screen_height - 250, 200, 'Press \'R\' to restart.', 'white')
-	if w.data.score > w.data.highscore:
-		w.newText(screen_width / 2 - 5, screen_height / 3, 100, '!!HIGH SCORE!!', 'yellow')
-		w.setText(w.data.hstNum, str(w.data.score).zfill(4))
-		write_new_highscore(w.data.score)
-	w.data.isGameOver = True
-
-def setGameClear():
-	w.newText(screen_width / 2 - 5, screen_height / 3 + 20, 100, '!!GAME CLEAR!!', 'green')
-	w.newText(screen_width / 2 - 5, screen_height - 300, 200, 'Press \'ESC\' to quit.', 'white')
-	w.newText(screen_width / 2 - 5, screen_height - 250, 200, 'Press \'R\' to restart.', 'white')
-	if w.data.score > w.data.highscore:
-		w.newText(screen_width / 2 - 5, screen_height / 3, 100, '!!HIGH SCORE!!', 'yellow')
-		w.setText(w.data.hstNum, str(w.data.score).zfill(4))
-		write_new_highscore(w.data.score)	
+	if score > w.data.highscore:
+		w.newImage(screen_width / 2 - 136, screen_height / 3, 'new_high.png', 273, 23)
+		w.setText(w.data.hstNum, str(score).zfill(4))
+		write_new_highscore(score)
 	w.data.isGameOver = True
 
 def initialize(timestamp):
 	w.data.objs = []
 
 	w.data.isGameOver = False
+	w.data.isClear = False
 
 	w.data.bg = w.newRectangle(x_offset, y_offset, screen_width - (x_offset * 2), screen_height - (y_offset * 2))
 	w.data.game_over_line_y = screen_height - (y_offset * 1.5)
 
-	w.data.score = 0
 	w.data.highscore = read_highscore()
 	print(w.data.highscore)
-	sText = str(w.data.score).zfill(4)
+	sText = str(score).zfill(4)
 	hsText = str(w.data.highscore).zfill(4)
 	w.newText(x_offset * 2.3 - 10, y_offset * 1.5, 200, 'SCORE', 'white')
 	w.data.stNum = w.newText(x_offset * 2.3 - 10, y_offset * 1.7, 200, sText, 'white')
@@ -121,6 +113,8 @@ def initialize(timestamp):
 	w.newImage(0, 0, 'frame.png', screen_width, screen_height)
 
 def update(timestamp):
+	global score
+	global gameClearTime
 	if w.keys['Escape']:
 		w.stop()
 		return
@@ -128,7 +122,7 @@ def update(timestamp):
 		initialize(timestamp)
 	life_count = w.data.player_life
 	w.setText(w.data.ltNum, str(w.data.player_life))
-	w.setText(w.data.stNum, str(w.data.score).zfill(4))
+	w.setText(w.data.stNum, str(score).zfill(4))
 	for obj in w.data.objs:
 		if obj[0] == 'life_gauge':
 			if life_count <= 0:
@@ -207,7 +201,7 @@ def update(timestamp):
 				'''
 				if obj[5] and timestamp - obj[6] > 0.3:	
 					ufo_score = random.randint(50, 300)
-					w.data.score += ufo_score
+					score += ufo_score
 					obj[2] = w.data.ufo_x
 					obj[4] = timestamp
 					w.setImage(obj[1], 'ufo.png', w.data.ufo_width, w.data.ufo_height)
@@ -255,7 +249,7 @@ def update(timestamp):
 					w.data.objs.remove(obj)
 				
 				if obj[10] and timestamp - obj[11] > 0.2:	
-					w.data.score += 30 - (obj[2] * 10)
+					score += 30 - (obj[2] * 10)
 					w.playSound('invader_die.wav')
 					w.deleteObject(obj[1])
 					w.data.objs.remove(obj)
@@ -305,8 +299,14 @@ def update(timestamp):
 				if obj[3] > w.data.game_over_line_y - w.data.invader_missile_height:
 					w.deleteObject(obj[1])
 					w.data.objs.remove(obj)
-		if w.data.invader_count == 0:
-			setGameClear()
+		if w.data.isClear == False and w.data.invader_count == 0:
+			w.data.isClear = True
+			gameClearTime = timestamp
+			print(w.data.isClear)
+			print(gameClearTime)
+		if w.data.isClear == True and timestamp - gameClearTime > 1:
+			print("restart")
+			initialize(timestamp)
 w.initialize = initialize
 w.update = update
 
