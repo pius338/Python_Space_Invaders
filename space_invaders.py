@@ -174,6 +174,9 @@ def update(timestamp):
 		w.stop()
 		return
 	if w.data.isGameOver and w.keys['r']:
+		score = 0
+		gameClearTime = 0
+		timeMod = 0.9
 		initialize(timestamp)
 	life_count = w.data.player_life
 	w.setText(w.data.ltNum, str(w.data.player_life))
@@ -276,7 +279,7 @@ def update(timestamp):
 					m_x = missile[2] + (w.data.missile_width / 2)
 					m_y = missile[3]
 					if m_x > obj[2] and m_x < obj[2] + w.data.ufo_width and m_y > obj[3] and m_y < obj[3] + w.data.ufo_height:
-						w.setImage(obj[1], 'invader_die.png', 52, 32)
+						w.setImage(obj[1], 'ufo_die.png', 53, 33)
 						obj[5] = True
 						obj[6] = timestamp
 						w.playSound('invader_die.wav')
@@ -323,7 +326,7 @@ def update(timestamp):
 						w.data.objs.remove(missile)
 						break
 
-				if  random.random() < 0.0008 and timestamp - w.data.last_invader_missile_time > 0.5:
+				if  random.random() < 0.001 and timestamp - w.data.last_invader_missile_time > 0.5:
 					mNum = w.newImage(obj[4], obj[5], w.data.invader_missilefiles[0], w.data.invader_missile_width, w.data.invader_missile_height)
 					w.data.objs.append(['invader_missile', mNum, obj[4], obj[5], 0, timestamp])
 					w.data.last_invader_missile_time = timestamp
@@ -344,7 +347,7 @@ def update(timestamp):
 						obj[9] = max(0.05, obj[9] * timeMod)
 				w.data.invader_count += 1
 			elif obj[0] == 'invader_missile':
-				obj[3] += 3
+				obj[3] += 4
 				obj[4] = (obj[4] + 1) % 4
 				w.moveObject(obj[1], obj[2], obj[3])
 				if timestamp - obj[5] > 0.1:
