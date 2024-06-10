@@ -48,8 +48,9 @@ def initialize(timestamp):
 	w.data.isGameOver = False
 	w.data.isClear = False
 
-	w.data.bg = w.newRectangle(x_offset, y_offset, screen_width - (x_offset * 2), screen_height - (y_offset * 2))
+	w.data.bg = w.newRectangle(x_offset - 4, y_offset, screen_width - (x_offset * 2) + 8, screen_height - (y_offset * 2))
 	w.data.game_over_line_y = screen_height - (y_offset * 1.5)
+	w.newText(screen_width - (x_offset * 3) + 10, screen_height - (y_offset * 1.25), 200, 'CAU CSE OSS Python Minsik Kim', 'green')
 
 	w.data.highscore = read_highscore()
 	sText = str(score).zfill(4)
