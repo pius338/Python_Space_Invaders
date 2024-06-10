@@ -7,6 +7,7 @@ x_offset = 60
 y_offset = 80
 score = 0
 gameClearTime = 0
+timeMod = 0.9
 
 w = gui.Window("Space Invador", screen_width, screen_height)
 
@@ -24,7 +25,7 @@ def read_highscore():
     except FileNotFoundError:
         print(f"Error: File 'highscore.txt' not found.")
     except ValueError as ve:
-        print(ve)
+        return 0
 
 def write_new_highscore(highscore):
     with open('highscore.txt', 'w') as file:
@@ -51,7 +52,6 @@ def initialize(timestamp):
 	w.data.game_over_line_y = screen_height - (y_offset * 1.5)
 
 	w.data.highscore = read_highscore()
-	print(w.data.highscore)
 	sText = str(score).zfill(4)
 	hsText = str(w.data.highscore).zfill(4)
 	w.newText(x_offset * 2.3 - 10, y_offset * 1.5, 200, 'SCORE', 'white')
@@ -66,8 +66,8 @@ def initialize(timestamp):
 	w.data.invader_interval_v = 42
 	w.data.invader_count = 0
 
-	w.data.ufo_width = 48
-	w.data.ufo_height = 21
+	w.data.ufo_width = 49
+	w.data.ufo_height = 22
 	w.data.ufo_x = x_offset - w.data.ufo_width - 5
 	w.data.ufo_y = y_offset * 2
 
@@ -81,8 +81,8 @@ def initialize(timestamp):
 	w.data.invader_missilefiles = ['invader_missile_1.png', 'invader_missile_2.png', 'invader_missile_3.png', 'invader_missile_4.png']
 	w.data.last_invader_missile_time = 0
 
-	w.data.player_width = 26
-	w.data.player_height = 16
+	w.data.player_width = 27
+	w.data.player_height = 17
 	w.data.player_life = 3
 	player_x = (screen_width / 2) - (w.data.player_width / 2)
 	player_y = w.data.game_over_line_y - (w.data.player_height * 2.5)
@@ -115,6 +115,8 @@ def initialize(timestamp):
 def update(timestamp):
 	global score
 	global gameClearTime
+	global timeMod
+
 	if w.keys['Escape']:
 		w.stop()
 		return
@@ -163,7 +165,7 @@ def update(timestamp):
 						if m_x > obj[2] and m_x < obj[2] + w.data.player_width and m_y > obj[3] and m_y < obj[3] + w.data.player_height:
 							w.deleteObject(missile[1])
 							w.data.objs.remove(missile)
-							w.setImage(obj[1], 'player_die.png', 30, 16)
+							w.setImage(obj[1], 'player_die.png', 31, 17)
 							obj[5] = True
 							obj[6] = timestamp
 							w.playSound('explosion.wav')
@@ -281,13 +283,12 @@ def update(timestamp):
 					w.setImage(obj[1], w.data.filenames[obj[2]][obj[3]], w.data.invader_width[obj[2]], w.data.invader_height[obj[2]])
 					obj[6] = timestamp + obj[9]
 					obj[7] += 1
-					# obj[9] = 0.01
 					if obj[7] >= 11:
 						obj[4] += 8 * obj[8]
 						obj[5] += w.data.invader_interval_v / 3
 						obj[8] *= -1
 						obj[7] = -1
-						obj[9] = max(0.1, obj[9] * 0.9)
+						obj[9] = max(0.05, obj[9] * timeMod)
 				w.data.invader_count += 1
 			elif obj[0] == 'invader_missile':
 				obj[3] += 3
@@ -302,10 +303,8 @@ def update(timestamp):
 		if w.data.isClear == False and w.data.invader_count == 0:
 			w.data.isClear = True
 			gameClearTime = timestamp
-			print(w.data.isClear)
-			print(gameClearTime)
 		if w.data.isClear == True and timestamp - gameClearTime > 1:
-			print("restart")
+			timeMod -= 0.1
 			initialize(timestamp)
 w.initialize = initialize
 w.update = update
