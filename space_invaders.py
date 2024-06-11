@@ -94,6 +94,11 @@ def setGameOver():
 		write_new_highscore(score)
 	w.data.isGameOver = True
 
+def trashCan():
+	for obj in w.data.objs:
+		w.deleteObject(obj[1])
+		w.data.objs.remove(obj)
+
 def initialize(timestamp):
 	w.data.objs = []
 
@@ -177,6 +182,7 @@ def update(timestamp):
 		score = 0
 		gameClearTime = 0
 		timeMod = 0.9
+		trashCan()
 		initialize(timestamp)
 	life_count = w.data.player_life
 	w.setText(w.data.ltNum, str(w.data.player_life))
@@ -211,7 +217,7 @@ def update(timestamp):
 						w.moveObject(obj[1], obj[2], obj[3])
 					if w.keys['space'] and timestamp - w.data.last_missile_time > 0.5:
 						mNum = w.newImage(obj[2], obj[3], w.data.missilefiles[0], w.data.missile_width, w.data.missile_height)
-						w.data.objs.append(['missile', mNum, obj[2], obj[3], 0, timestamp])
+						w.data.objs.append(['missile', mNum, obj[2] + (w.data.player_width / 2) - (w.data.missile_width / 2), obj[3], 0, timestamp])
 						w.data.last_missile_time = timestamp
 						w.playSound('shoot.wav')
 				
@@ -361,6 +367,7 @@ def update(timestamp):
 			gameClearTime = timestamp
 		if w.data.isClear == True and timestamp - gameClearTime > 1:
 			timeMod -= 0.1
+			trashCan()
 			initialize(timestamp)
 w.initialize = initialize
 w.update = update
